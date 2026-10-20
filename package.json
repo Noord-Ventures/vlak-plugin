@@ -1,0 +1,16 @@
+{
+  "name": "vlak-claude-plugin",
+  "version": "0.5.1",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.18.1"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@noorddev/vlak-mcp": "0.5.0"
+  }
+}
