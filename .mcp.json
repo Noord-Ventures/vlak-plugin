@@ -1,8 +1,8 @@
 {
   "mcpServers": {
     "vlak": {
-      "command": "node",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/start-mcp.mjs"]
+      "type": "http",
+      "url": "https://vlak.dev/mcp"
     }
   }
 }

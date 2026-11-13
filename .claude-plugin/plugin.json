@@ -1,7 +1,7 @@
 {
   "name": "vlak",
   "displayName": "Vlak",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "Design and implement accessible product interfaces with the Vlak component system.",
   "author": {
     "name": "Noord Ventures",
@@ -10,9 +10,8 @@
   "homepage": "https://vlak.dev",
   "repository": "https://github.com/Noord-Ventures/vlak-plugin",
   "license": "MIT",
-  "icon": "./icon.svg",
+  "icon": "./icon.png",
   "documentationUrl": "https://vlak.dev/docs/agents/",
   "supportUrl": "https://github.com/Noord-Ventures/vlak/issues",
-  "privacyPolicyUrl": "https://vlak.dev/privacy/",
-  "mcpServers": "./.mcp.json"
+  "privacyPolicyUrl": "https://vlak.dev/privacy/"
 }

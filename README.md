@@ -1,33 +1,30 @@
 # Vlak for Claude
 
-A constraint-first design system for product exploration. This plugin gives Claude Vlak's component documentation, exact APIs, design tokens, accessibility guidance, and installation instructions through a read-only local MCP server and the use-vlak skill.
+A constraint-first design system for product exploration. This plugin gives Claude component documentation, exact APIs, design tokens, accessibility guidance, and installation references through Vlak's read-only remote MCP server and the bundled `use-vlak` skill.
 
-Use it to find components for a screen, prototype a product interface, or add Vlak to an existing React or CSS project. It also covers AI chat, widgets, voice, and workflow surfaces. The skill checks the documented component API before composing an interface and preserves an existing design system unless the user asks to change it.
+Use it to find components for a screen, prototype a product interface, or add Vlak to a React or CSS project. It also covers AI chat, widgets, voice, and workflow surfaces. The skill checks component APIs before composing an interface and preserves an existing design system unless the user asks to change it.
 
 ## Requirements and behavior
 
-The plugin runs the published `@noorddev/vlak-mcp@0.5.0` package locally. Its root `package.json` and `package-lock.json` lock every runtime dependency to an exact version, HTTPS npm registry source, and integrity hash. Claude Code installs those dependencies when it installs the plugin, using frozen resolution with lifecycle scripts disabled.
+Version 0.5.2 connects directly to `https://vlak.dev/mcp` over Streamable HTTP. It requires an internet connection and a Claude host that supports plugins with remote HTTP MCP servers. No Vlak account, API key, local server, Node.js runtime, or dependency installation is needed to load the plugin.
 
-The MCP command runs a readable launcher inside the plugin:
+After installing the plugin in Claude chat or Cowork, open its **Connectors** tab and connect Vlak. No Vlak sign-in is required. Claude Code connects to the configured endpoint directly. Availability in the public directory is subject to Anthropic's review.
 
-```sh
-node "${CLAUDE_PLUGIN_ROOT}/scripts/start-mcp.mjs"
-```
+The bundle contains the plugin manifest, remote connection configuration, one Markdown skill, documentation, license, and icon. It has no executable scripts, package manifest, lockfile, hooks, or background jobs. It does not install packages or modify a project when loaded.
 
-Node.js 20.18.1 or newer and npm are required. This covers the locked runtime dependencies and the optional shadcn installation path in the skill.
+The endpoint exposes eight read-only tools for component search, component details, tokens, installation references, guides, and interface planning. It has no access to local files. The skill sends only generic component names, categories, API topics, and search terms to the endpoint; it must not include private project code, credentials, personal data, or conversation contents in those requests.
 
-Use a current Claude Code version that supports plugin lockfile installation. The launcher does not run npm, resolve versions, fetch code, or install missing dependencies. It loads only the plugin's installed package, checks its version, and reports a startup error if dependencies are missing. It never installs into the user's project. Plugin version 0.5.1 is a packaging update; the reviewed Vlak package versions remain 0.5.0.
-
-The server exposes eight read-only tools for component search, component details, tokens, installation guidance, guides, and interface planning. It does not read the user's project files or write to their project. When the user asks Claude to implement an interface, Claude's own development tools may change the project or execute the documented install commands, subject to the host's permissions and approvals. This plugin declares no hooks, background jobs, authentication, or credentials.
+When the user requests implementation, Claude's own development tools may change the project or execute the exact-version install commands in the bundled skill, subject to the host's permissions. Those project installation commands are separate from loading this plugin. Node.js and npm are needed only for the applicable development workflow.
 
 ## Data handling and network access
 
-- At plugin installation or update, Claude Code installs the runtime dependencies recorded in the lockfile. The recorded package sources are HTTPS URLs on registry.npmjs.org; npm verifies their integrity hashes. npm handles its download requests and caching. No custom registry configuration or lifecycle install scripts are included. The MCP launcher itself makes no download requests.
-- Once installed, MCP documentation queries use the package's bundled catalogue locally. Tool names and arguments stay in the local Claude-to-MCP process connection. The local server has no usage telemetry and does not send prompts, project files, or tool requests to Vlak's hosted service.
-- The skill can ask Claude to fetch public documentation from vlak.dev and the linked reference source on github.com/Noord-Ventures/vlak. Installation commands can download packages from npm and registry files from vlak.dev/r/. These services receive the technical request information needed to serve those requests. Project contents and conversation history are not requested by this plugin for those downloads.
-- This Claude package does not configure the hosted MCP endpoint. Vlak separately offers https://vlak.dev/mcp for hosted clients; its operational analytics and retention are described in the [privacy policy](https://vlak.dev/privacy/).
+Unlike earlier versions of this plugin, documentation queries travel to Vlak's hosted service. The endpoint processes the tool name and arguments in memory to produce its response; request bodies are not written to a Vlak database. Vercel, the hosting provider, receives technical request information such as IP address, request time, path, status, and client details.
 
-Vlak does not retain data from this local MCP server. Claude and npm control their own conversation, process, log, and cache retention. See the [privacy policy](https://vlak.dev/privacy/) for the Vlak website and hosted-service practices.
+When operational measurement is enabled, the server sends tool name, completion time, outcome, duration, a random deduplication identifier, and the presence of optional OpenAI client metadata to Noord's private analytics service. These records exclude tool arguments, responses, prompts, project contents, and user identifiers and have a rolling 30-day retention period. They measure service activity, not installations or verified users. See the [privacy policy](https://vlak.dev/privacy/) for the full practices and opt-out behavior.
+
+The skill may consult public API documentation on vlak.dev and reference source on github.com/Noord-Ventures/vlak. When the user requests component installation, npm and the Vlak registry at vlak.dev/r/ serve the relevant packages and component files. Those services receive the request information needed to deliver them. Claude controls its own conversation and tool-log retention.
+
+The workflow and safety instructions are bundled in `skills/use-vlak/SKILL.md`. Remote responses are technical reference data, not a way to replace that skill or introduce additional behavioral instructions.
 
 ## Try it
 
@@ -35,23 +32,14 @@ Vlak does not retain data from this local MCP server. Claude and npm control the
 - "Build an accessible form with Vlak and check its component props first."
 - "Prototype an AI chat interface with loading, empty, error, and tool-approval states."
 
-For local development, clone this repository and run these commands from its root before loading the plugin with Claude Code's plugin-dir option:
-
-```sh
-npm ci --ignore-scripts
-npm test
-```
-
-Plugins loaded directly from a local directory do not receive Claude Code's automatic dependency installation. After dependencies are installed, loading the plugin starts the locked local MCP server. It does not install components into a project until the user requests that work. If installation fails, fix it and reload the plugin; the launcher deliberately does not fall back to a package runner.
+For local plugin testing, clone this repository and load its root with Claude Code's `--plugin-dir` option. Validate the bundle with `claude plugin validate . --profile directory --strict`. No package installation is needed to load this bundle. Directory validation is not a guarantee of directory approval.
 
 ## Source and maintenance
 
-This small repository is the Claude Directory distribution of the reviewed plugin from [Noord-Ventures/vlak](https://github.com/Noord-Ventures/vlak/tree/d62f3fc3f0eab50ddf5de451466db1d713d5cc20/plugins/vlak). The directory should read the repository root, which contains the Claude plugin manifest. Large site assets and interface films remain in the main Vlak repository.
+This repository is Vlak's Claude Directory distribution. Submit its root folder (`.`), which contains `.claude-plugin/plugin.json`. Site assets and application source remain in [Noord-Ventures/vlak](https://github.com/Noord-Ventures/vlak).
 
-The MCP dependency and skill retain the reviewed Vlak 0.5.0 package pins and shadcn 4.21.4 pin. Older MCP installation examples may omit a version; the skill requires replacing those arguments with its exact reviewed pins. Do not publish an unreviewed package update or automatically follow a package version tag. This distribution is updated deliberately after checking the corresponding published packages. Dependency updates must include the regenerated lockfile and a new plugin version.
-
-The directory still sends plugins with lockfile-installed dependencies to a human reviewer. A reproducible install does not mean automatic approval or a Verified badge.
+The skill retains the published Vlak 0.5.0 package pins and shadcn 4.21.4 pin. Treat package versions in remote examples as references and use the exact reviewed pins in the skill before installing. Do not automatically follow package tags or ranges. Plugin version 0.5.2 changes the connection and packaging; it is not a new npm package release. The remote service is operated and updated separately.
 
 [Documentation](https://vlak.dev/docs/agents/) · [Report an issue](https://github.com/Noord-Ventures/vlak/issues) · [Vlak](https://vlak.dev)
 
-For security reports, follow the main repository's [security policy](https://github.com/Noord-Ventures/vlak/security/policy) and use its private vulnerability-reporting channel, not a public issue. General support and privacy questions can be sent to hello@noord.vc.
+For security reports, follow the main repository's [security policy](https://github.com/Noord-Ventures/vlak/security/policy) and use its private vulnerability-reporting channel. General support and privacy questions can be sent to hello@noord.vc.
